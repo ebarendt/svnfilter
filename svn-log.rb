@@ -8,6 +8,12 @@ def filter_changes_by_users(changes, users)
   end
 end
 
+def filter_changes_by_log(changes, message="")
+  changes.select do |logentry|
+    logentry.xpath("msg").text =~ /#{message}/i
+  end
+end
+
 def get_changes(xml_document)
   xml_document.xpath("//logentry")
 end  
@@ -31,4 +37,5 @@ users = %w(user1 user2)
 xml = Nokogiri::XML.parse(`svn log -r #{first_revision}:HEAD --xml`)
 changes = get_changes(xml)
 filtered = filter_changes_by_users(changes, users)
+#filtered = filter_changes_by_log(changes, message)
 puts find_changed_files(filtered)
