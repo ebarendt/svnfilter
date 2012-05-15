@@ -2,7 +2,7 @@
 
 # Filters svn log output for the list of files changed, optionally accepting changes for only some users.
 # Usage:
-#   svn-log.rb -r=revision -users=user1,user2
+#   svn-log.rb -r=revision -users=user1,user2 -msg="some message filter"
 
 require 'nokogiri'
 
