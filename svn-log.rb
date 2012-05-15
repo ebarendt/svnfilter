@@ -5,7 +5,6 @@
 #   svn-log.rb -r=revision -users=user1,user2 -msg="some message filter"
 
 require 'nokogiri'
-require 'set'
 
 def usage
   puts <<END
@@ -44,12 +43,7 @@ def get_files_in_revision(revision)
 end
 
 def find_changed_files(changes)
-  result = SortedSet.new
-  changes.each do |change|
-    files = get_files_in_revision(change["revision"].to_i)
-    result.merge(files)
-  end
-  result.to_a
+  changes.map { |change| get_files_in_revision(change["revision"].to_i) }.flatten.sort.uniq
 end
 
 first_revision = $r
