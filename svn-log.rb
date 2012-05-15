@@ -37,9 +37,7 @@ end
 
 def get_files_in_revision(revision)
   cmd_output = `svn diff --no-diff-deleted --summarize -r #{revision - 1}:#{revision}`
-  [].tap do |result|
-    cmd_output.each_line { |line| result << line.split(/\s+/)[1] }
-  end
+  cmd_output.lines.map { |line| line.split(/\s+/)[1] }
 end
 
 def find_changed_files(changes)
