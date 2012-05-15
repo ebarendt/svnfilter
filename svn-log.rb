@@ -24,15 +24,12 @@ END
 end
 
 def filter_changes_by_users(changes, users)
-  changes.select do |logentry|
-    !users || users.empty? ? true : users.include?(logentry.xpath("author").text)
-  end
+  return changes unless users && !users.empty?
+  changes.select { |logentry| users.include?(logentry.xpath("author").text) }
 end
 
 def filter_changes_by_log(changes, message="")
-  changes.select do |logentry|
-    logentry.xpath("msg").text =~ /#{message}/i
-  end
+  changes.select { |logentry| logentry.xpath("msg").text =~ /#{message}/i }
 end
 
 def get_changes(xml_document)
@@ -40,14 +37,17 @@ def get_changes(xml_document)
 end  
 
 def get_files_in_revision(revision)
-  `svn diff --no-diff-deleted --summarize -r #{revision - 1}:#{revision}`
+  cmd_output = `svn diff --no-diff-deleted --summarize -r #{revision - 1}:#{revision}`
+  [].tap do |result|
+    cmd_output.each_line { |line| result << line.split(/\s+/)[1] }
+  end
 end
 
 def find_changed_files(changes)
   result = SortedSet.new
   changes.each do |change|
     files = get_files_in_revision(change["revision"].to_i)
-    files.each_line { |line| result << line.split(/\s+/)[1] }
+    result.merge(files)
   end
   result.to_a
 end
