@@ -5,6 +5,7 @@
 #   svn-log.rb -r=revision -users=user1,user2 -msg="some message filter"
 
 require 'nokogiri'
+require 'set'
 
 def usage
   puts <<END
@@ -24,7 +25,7 @@ end
 
 def filter_changes_by_users(changes, users)
   changes.select do |logentry|
-    users.empty? ? true : users.include?(logentry.xpath("author").text)
+    !users || users.empty? ? true : users.include?(logentry.xpath("author").text)
   end
 end
 
@@ -43,12 +44,12 @@ def get_files_in_revision(revision)
 end
 
 def find_changed_files(changes)
-  result = []
+  result = SortedSet.new
   changes.each do |change|
     files = get_files_in_revision(change["revision"].to_i)
     files.each_line { |line| result << line.split(/\s+/)[1] }
   end
-  result.sort.uniq
+  result.to_a
 end
 
 first_revision = $r
