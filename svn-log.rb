@@ -15,8 +15,9 @@ first, then filtered by message.
 Usage:
   svn-log.rb -r=revision -users=user1,user2 -msg="some message filter"
 
-  -r=revision          revision is the revision from which to start querying
-                       SVN
+  -help                (optional) displays this message and exits
+  -r=revision          (optional) revision is the revision from which to start querying
+                       SVN fetches the revisions of the last 7 days by default
   -users=user1,user2   (optional) a comma separated list of users to filter for
   -msg="a message"     (optional) a string used to filter commit messages
 END
@@ -28,7 +29,7 @@ def filter_changes_by_users(changes, users)
 end
 
 def filter_changes_by_log(changes, message="")
-  changes.select { |logentry| logentry.xpath("msg").text =~ /#{message}/i }
+  changes.select { |logentry| logentry.xpath("msg").text =~ /#{Regexp.escape(message)}/i }
 end
 
 def get_changes(xml_document)
@@ -44,11 +45,11 @@ def find_changed_files(changes)
   changes.map { |change| get_files_in_revision(change["revision"].to_i) }.flatten.sort.uniq
 end
 
-first_revision = $r
+first_revision = $r || "{#{(Time.now - 3600 * 24 * 7).strftime('%Y-%m-%d')}}"
 users = if $users then $users.split(",") else nil end
 message = $msg
 
-unless first_revision
+if $help
   usage
   exit(1)
 end
