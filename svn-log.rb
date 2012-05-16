@@ -41,7 +41,8 @@ def get_files_in_revision(revision)
 end
 
 def find_changed_files(changes)
-  changes.map { |change| get_files_in_revision(change["revision"].to_i) }.flatten.sort.uniq
+  changes.map { |change| get_files_in_revision(change["revision"].to_i) }.flatten.sort.uniq.
+      map { |f| f.gsub /\\/, '/' }
 end
 
 first_revision = $r
