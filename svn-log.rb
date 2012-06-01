@@ -48,7 +48,7 @@ end
 
 first_revision = $r || "{#{(Time.now - 3600 * 24 * 7).strftime('%Y-%m-%d')}}"
 users = if $users then $users.split(",") else nil end
-message = $msg
+message = $msg || ''
 
 if $help
   usage
