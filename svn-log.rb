@@ -38,12 +38,22 @@ end
 
 def get_files_in_revision(revision)
   cmd_output = `svn diff --no-diff-deleted --summarize -r #{revision - 1}:#{revision}`
-  cmd_output.lines.map { |line| line.split[1] }
+  cmd_output.lines.to_a
 end
 
 def find_changed_files(changes)
-  changes.map { |change| get_files_in_revision(change["revision"].to_i) }.flatten.sort.uniq.
-      map { |f| f.gsub /\\/, '/' }
+  changed_files, deleted_files = changes.inject([[], []]) do |acc, change|
+    changed, deleted = acc
+    changes_in_revision = get_files_in_revision(change['revision'].to_i).map &:split
+
+    new_deleted, new_changed = changes_in_revision.partition {|action, file| action == 'D'}
+    changed += new_changed.map {|action, file| file}
+    deleted += new_deleted.map {|action, file| file}
+
+    [changed, deleted]
+  end
+
+  (changed_files - deleted_files).sort.uniq.map { |f| f.gsub /\\/, '/' }
 end
 
 first_revision = $r || "{#{(Time.now - 3600 * 24 * 7).strftime('%Y-%m-%d')}}"
